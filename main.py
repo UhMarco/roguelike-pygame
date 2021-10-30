@@ -9,9 +9,11 @@ WORLD_SIZE = TILE_SIZE * 8 * 5
 SIZE = 900
 
 pygame.init()
-screen = pygame.display.set_mode((SIZE, SIZE))
+window = pygame.display.set_mode((SIZE, SIZE))
+screen = window.copy()
 clock = pygame.time.Clock()
 fps = 30
+screen_shake = 0
 
 font = pygame.font.Font("./assets/KLEINTEN.ttf", 32)
 font_lg = pygame.font.Font("./assets/KLEINTEN.ttf", 64)
@@ -41,6 +43,7 @@ for i in range(4):
 UI_SIZE = (TILE_SIZE * 2, TILE_SIZE * 2)
 UI_OFFSET = 10
 
+bg = pygame.transform.scale(pygame.image.load("./assets/bg.png"), (UI_SIZE[0] * 8, UI_SIZE[0] * 4))
 key_ui = pygame.transform.scale(pygame.image.load("./assets/key.png"), UI_SIZE)
 potion_ui = pygame.transform.scale(pygame.image.load("./assets/potion.png"), UI_SIZE)
 
@@ -275,7 +278,14 @@ while current_level <= LEVELS:
                         offset_y -= TILE_SIZE
                         player_pos += 8 * 5 
 
-        if int(world[player_pos]) == 15:
+            elif event.type == pygame.KEYDOWN and game_over:
+                if event.key == pygame.K_r:
+                    current_level = 0
+                    game_over = False
+                    running = False
+
+        if int(world[player_pos]) == 15 and not game_over:
+            screen_shake = 10
             game_over = True
 
         elif world[player_pos] == 16:
@@ -369,9 +379,20 @@ while current_level <= LEVELS:
             screen.blit(key_ui, (UI_SIZE[0] * i, UI_OFFSET * 9))
 
         if game_over:
+            screen.blit(bg, (SIZE / 2 - bg.get_rect().width / 2, SIZE / 2 - bg.get_rect().height / 2 - UI_OFFSET * 30))
             text = font_lg.render("Game Over!", False, FONT_COLOUR)
-            screen.blit(text, (SIZE / 2 - text.get_rect().width / 2, SIZE / 2 - text.get_rect().height / 2))
+            screen.blit(text, (SIZE / 2 - text.get_rect().width / 2, SIZE / 2 - text.get_rect().height / 2 - UI_OFFSET * 30 - 20))
+            text = font.render("Press [R] to restart.", False, FONT_COLOUR)
+            screen.blit(text, (SIZE / 2 - text.get_rect().width / 2, SIZE / 2 - text.get_rect().height / 2 - UI_OFFSET * 30 + 40))
 
+
+        render_offset = [0, 0]
+        if screen_shake > 0:
+            screen_shake -= 1
+            render_offset[0] = random.randint(0, 8) - 4
+            render_offset[1] = random.randint(0, 8) - 4
+
+        window.blit(screen, render_offset)
         pygame.display.update()
 
     # Level complete
