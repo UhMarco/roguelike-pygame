@@ -45,14 +45,15 @@ UI_OFFSET = 10
 
 bg = pygame.transform.scale(pygame.image.load("./assets/bg.png"), (UI_SIZE[0] * 8, UI_SIZE[0] * 4))
 key_ui = pygame.transform.scale(pygame.image.load("./assets/key.png"), UI_SIZE)
-potion_ui = pygame.transform.scale(pygame.image.load("./assets/potion.png"), UI_SIZE)
+potion_ui = pygame.transform.scale(pygame.image.load("./assets/potion.png"), (UI_SIZE[0] * 0.8, UI_SIZE[0] * 0.8))
 
 pygame.display.set_caption("Dungeon")
 pygame.display.set_icon(player_img)
 
 # Main
-LEVELS = 5
+LEVELS = 10
 current_level = 1
+player_potions = 0 # Let these carry between levels
 
 while current_level <= LEVELS:
 
@@ -148,7 +149,6 @@ while current_level <= LEVELS:
     player_y = SIZE / 2 - TILE_SIZE / 2
     player_pos = 0
     player_keys = 0
-    player_potions = 0
     player_steps = 2
     player_flipped = False
 
@@ -176,12 +176,12 @@ while current_level <= LEVELS:
             if room[j] == 12:
                 room[j] = 16
 
-    # Bomb spawns
-    bomb_indexes = room_indexes.copy()
-    for i in range(3):
-        index = random.choice(bomb_indexes)
+    # Potion spawns
+    potion_indexes = room_indexes.copy()
+    for i in range(random.randint(3, 3 + current_level)):
+        index = random.choice(potion_indexes)
         room = world[index]
-        bomb_indexes.remove(index)
+        potion_indexes.remove(index)
         for j in range(len(room)):
             if room[j] == 13:
                 room[j] = 17
@@ -252,6 +252,7 @@ while current_level <= LEVELS:
                                 world[player_pos - 1] = 0
                                 offset_x += TILE_SIZE
                                 player_pos -= 1
+                                screen_shake = 5
 
                         else:
                             offset_x += TILE_SIZE
@@ -268,6 +269,7 @@ while current_level <= LEVELS:
                         # Walks into exit
                         if world[player_pos - (8 * 5)] == 31:
                             # Level complete
+                            screen_shake = 20
                             running = False
 
                         offset_y += TILE_SIZE
@@ -276,11 +278,17 @@ while current_level <= LEVELS:
                 elif event.key in [pygame.K_DOWN, pygame.K_s]:
                     if world[player_pos + (8 * 5)] not in wall_tiles:
                         offset_y -= TILE_SIZE
-                        player_pos += 8 * 5 
+                        player_pos += 8 * 5
+
+                elif event.key == pygame.K_p:
+                    if player_potions > 0:
+                        player_potions -= 1
+                        player_steps += 1
 
             elif event.type == pygame.KEYDOWN and game_over:
                 if event.key == pygame.K_r:
                     current_level = 0
+                    player_potions = 0
                     game_over = False
                     running = False
 
@@ -291,6 +299,10 @@ while current_level <= LEVELS:
         elif world[player_pos] == 16:
             world[player_pos] = 0
             player_keys += 1
+
+        elif world[player_pos] == 17 and player_potions < 5: # Maximum of 5 potions to hand
+            world[player_pos] = 0
+            player_potions += 1
 
         if player_start != player_pos:
             player_steps -= 1
@@ -377,6 +389,9 @@ while current_level <= LEVELS:
         screen.blit(text, (UI_OFFSET * 10.3, UI_OFFSET * 5.5))
         for i in range(player_keys):
             screen.blit(key_ui, (UI_SIZE[0] * i, UI_OFFSET * 9))
+
+        for i in range(player_potions):
+            screen.blit(potion_ui, (UI_OFFSET * 0.5 + UI_SIZE[0] * i, UI_OFFSET * 14))
 
         if game_over:
             screen.blit(bg, (SIZE / 2 - bg.get_rect().width / 2, SIZE / 2 - bg.get_rect().height / 2 - UI_OFFSET * 30))
