@@ -4,7 +4,7 @@ import random
 from bersenham import get_line
 from blueprints import blueprints, exit_blueprint
 
-TILE_SIZE = 20
+TILE_SIZE = 28
 WORLD_SIZE = TILE_SIZE * 8 * 5
 SIZE = 900
 
@@ -39,7 +39,7 @@ for i in range(4):
     )
 
 UI_SIZE = (TILE_SIZE * 2, TILE_SIZE * 2)
-UI_OFFSET = TILE_SIZE / 2
+UI_OFFSET = 10
 
 key_ui = pygame.transform.scale(pygame.image.load("./assets/key.png"), UI_SIZE)
 potion_ui = pygame.transform.scale(pygame.image.load("./assets/potion.png"), UI_SIZE)
