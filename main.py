@@ -6,10 +6,12 @@ from blueprints import blueprints, exit_blueprint
 
 TILE_SIZE = 28
 WORLD_SIZE = TILE_SIZE * 8 * 5
-SIZE = 900
+WIDTH = 1300
+HEIGHT = 900
+SIZE = (WIDTH, HEIGHT)
 
 pygame.init()
-window = pygame.display.set_mode((SIZE, SIZE))
+window = pygame.display.set_mode(SIZE)
 screen = window.copy()
 clock = pygame.time.Clock()
 fps = 30
@@ -53,7 +55,6 @@ pygame.display.set_icon(player_img)
 # Main
 LEVELS = 10
 current_level = 1
-player_potions = 0 # Let these carry between levels
 
 while current_level <= LEVELS:
 
@@ -145,15 +146,16 @@ while current_level <= LEVELS:
         if world[i]:
             room_indexes.append(i)
 
-    player_x = SIZE / 2 - TILE_SIZE / 2
-    player_y = SIZE / 2 - TILE_SIZE / 2
+    player_x = WIDTH / 2 - TILE_SIZE / 2
+    player_y = HEIGHT / 2 - TILE_SIZE / 2
     player_pos = 0
     player_keys = 0
+    player_potions = 0
     player_steps = 2
     player_flipped = False
 
-    offset_x = (SIZE - WORLD_SIZE) / 2 + TILE_SIZE * 4 - TILE_SIZE / 2
-    offset_y = (SIZE - WORLD_SIZE) / 2 + TILE_SIZE * 4 - TILE_SIZE / 2
+    offset_x = (WIDTH - WORLD_SIZE) / 2 + TILE_SIZE * 4 - TILE_SIZE / 2
+    offset_y = (HEIGHT - WORLD_SIZE) / 2 + TILE_SIZE * 4 - TILE_SIZE / 2
 
     # Find the spawn point in the centre room
     centre_room = world[12]
@@ -288,7 +290,6 @@ while current_level <= LEVELS:
             elif event.type == pygame.KEYDOWN and game_over:
                 if event.key == pygame.K_r:
                     current_level = 0
-                    player_potions = 0
                     game_over = False
                     running = False
 
@@ -300,7 +301,7 @@ while current_level <= LEVELS:
             world[player_pos] = 0
             player_keys += 1
 
-        elif world[player_pos] == 17 and player_potions < 5: # Maximum of 5 potions to hand
+        elif world[player_pos] == 17:
             world[player_pos] = 0
             player_potions += 1
 
@@ -394,11 +395,11 @@ while current_level <= LEVELS:
             screen.blit(potion_ui, (UI_OFFSET * 0.5 + UI_SIZE[0] * i, UI_OFFSET * 14))
 
         if game_over:
-            screen.blit(bg, (SIZE / 2 - bg.get_rect().width / 2, SIZE / 2 - bg.get_rect().height / 2 - UI_OFFSET * 30))
+            screen.blit(bg, (WIDTH / 2 - bg.get_rect().width / 2, HEIGHT / 2 - bg.get_rect().height / 2 - UI_OFFSET * 30))
             text = font_lg.render("Game Over!", False, FONT_COLOUR)
-            screen.blit(text, (SIZE / 2 - text.get_rect().width / 2, SIZE / 2 - text.get_rect().height / 2 - UI_OFFSET * 30 - 20))
+            screen.blit(text, (WIDTH / 2 - text.get_rect().width / 2, HEIGHT / 2 - text.get_rect().height / 2 - UI_OFFSET * 30 - 20))
             text = font.render("Press [R] to restart.", False, FONT_COLOUR)
-            screen.blit(text, (SIZE / 2 - text.get_rect().width / 2, SIZE / 2 - text.get_rect().height / 2 - UI_OFFSET * 30 + 40))
+            screen.blit(text, (WIDTH / 2 - text.get_rect().width / 2, HEIGHT / 2 - text.get_rect().height / 2 - UI_OFFSET * 30 + 40))
 
 
         render_offset = [0, 0]
@@ -414,5 +415,6 @@ while current_level <= LEVELS:
     current_level += 1
 
 
+print(LEVELS, "complete!")
 pygame.quit()
 quit()
